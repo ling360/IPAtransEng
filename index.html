@@ -7,7 +7,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Montserrat -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles for Montserrat font */
         body {
@@ -48,17 +48,26 @@
             box-shadow: 0 0 0 3px rgba(182, 161, 139, 0.4); /* Soft focus shadow with gold */
         }
         button {
-            padding: 1rem 2rem; /* Increased padding for bigger buttons */
+            /* Explicitly setting height and width to force size */
+            height: 70px; /* Fixed height for the button */
+            width: 250px; /* Fixed width for the button */
+            padding: 0 1rem; /* Adjust padding to fit content within fixed size */
             border-radius: 0.75rem; /* Rounded corners for buttons */
-            font-weight: 600;
-            font-size: 1.1rem; /* Larger font size for buttons */
+            font-weight: 700; /* Made font bolder */
+            font-size: 1.4rem; /* Increased font size for buttons */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            display: inline-flex;
+            display: inline-flex; /* Keep inline-flex for icon-text alignment */
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            /* margin-bottom to create space between buttons if they stack */
+            margin-bottom: 1rem; /* Add margin for spacing when stacked or in row */
         }
+        /* Remove margin-bottom for the last button in the group */
+        .flex-col button:last-child, .sm\:flex-row button:last-child {
+            margin-bottom: 0;
+        }
+
         .btn-primary {
             background-color: #841D41; /* Red */
             color: #ffffff;
@@ -116,7 +125,7 @@
             placeholder="Type your English text here..."
         ></textarea>
 
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <div class="flex flex-col sm:flex-row justify-center">
             <button id="translateButton" class="btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
