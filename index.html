@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English to IPA Translator</title>
+    <title>IPA Translator</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Montserrat -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles for Montserrat font */
         body {
@@ -48,19 +48,17 @@
             box-shadow: 0 0 0 3px rgba(182, 161, 139, 0.4); /* Soft focus shadow with gold */
         }
         button {
-            /* Explicitly setting height and width to force size */
             height: 70px; /* Fixed height for the button */
             width: 250px; /* Fixed width for the button */
             padding: 0 1rem; /* Adjust padding to fit content within fixed size */
             border-radius: 0.75rem; /* Rounded corners for buttons */
-            font-weight: 700; /* Made font bolder */
-            font-size: 1.4rem; /* Increased font size for buttons */
+            font-weight: 700; /* Bolder font */
+            font-size: 1.4rem; /* Larger font size for buttons */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            display: inline-flex; /* Keep inline-flex for icon-text alignment */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            /* margin-bottom to create space between buttons if they stack */
             margin-bottom: 1rem; /* Add margin for spacing when stacked or in row */
         }
         /* Remove margin-bottom for the last button in the group */
@@ -113,16 +111,82 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .language-selector, .chinese-dialect-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .language-selector label, .chinese-dialect-selector label {
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .language-selector input[type="radio"], .chinese-dialect-selector input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #B6A18B;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .language-selector input[type="radio"]:checked, .chinese-dialect-selector input[type="radio"]:checked {
+            border-color: #841D41;
+        }
+        .language-selector input[type="radio"]:checked::before, .chinese-dialect-selector input[type="radio"]:checked::before {
+            content: '';
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #841D41;
+            border-radius: 50%;
+            display: block;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-3xl font-bold text-gray-800">English to IPA Translator</h1>
+        <h1 class="text-3xl font-bold text-gray-800">IPA Translator</h1>
+
+        <div class="language-selector">
+            <label>
+                <input type="radio" name="mainLanguage" value="english" checked>
+                English
+            </label>
+            <label>
+                <input type="radio" name="mainLanguage" value="chinese">
+                Chinese
+            </label>
+        </div>
+
+        <div id="chineseDialectSelector" class="chinese-dialect-selector hidden">
+            <label>
+                <input type="radio" name="chineseDialect" value="mandarin" checked>
+                Mandarin
+            </label>
+            <label>
+                <input type="radio" name="chineseDialect" value="cantonese">
+                Cantonese
+            </label>
+        </div>
 
         <textarea
-            id="englishInput"
+            id="textInput"
             class="w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Type your English text here..."
+            placeholder="Type your text here..."
         ></textarea>
 
         <div class="flex flex-col sm:flex-row justify-center">
@@ -148,17 +212,28 @@
 
     <script>
         // Get references to DOM elements
-        const englishInput = document.getElementById('englishInput');
+        const textInput = document.getElementById('textInput');
         const translateButton = document.getElementById('translateButton');
         const clearButton = document.getElementById('clearButton');
         const outputDisplay = document.getElementById('outputDisplay');
+        const mainLanguageRadios = document.querySelectorAll('input[name="mainLanguage"]');
+        const chineseDialectSelector = document.getElementById('chineseDialectSelector');
+        const chineseDialectRadios = document.querySelectorAll('input[name="chineseDialect"]');
 
         // Function to call the Gemini API for translation
-        async function translateTextToIPA(text) {
+        async function translateTextToIPA(text, language, dialect = '') {
             outputDisplay.innerHTML = '<div class="loading-spinner"></div> Translating...';
             try {
                 let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: `Translate the following English text into its International Phonetic Alphabet (IPA) transcription. Provide only the IPA transcription, without any additional text or explanation:\n\n"${text}"` }] });
+                let prompt;
+
+                if (language === 'english') {
+                    prompt = `Translate the following English text into its International Phonetic Alphabet (IPA) transcription. Provide only the IPA transcription, without any additional text or explanation:\n\n"${text}"`;
+                } else if (language === 'chinese') {
+                    prompt = `Translate the following Chinese text into its International Phonetic Alphabet (IPA) transcription for ${dialect}. Provide only the IPA transcription, without any additional text or explanation:\n\n"${text}"`;
+                }
+
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                 const payload = { contents: chatHistory };
                 const apiKey = ""; // Canvas will automatically provide the API key at runtime
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -186,28 +261,67 @@
             }
         }
 
+        // Event listener for main language selection
+        mainLanguageRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                if (event.target.value === 'chinese') {
+                    chineseDialectSelector.classList.remove('hidden');
+                    textInput.placeholder = "Type your Chinese text here (e.g., 你好 or 你好嗎)...";
+                } else {
+                    chineseDialectSelector.classList.add('hidden');
+                    textInput.placeholder = "Type your English text here...";
+                }
+                // Clear output and input when language changes
+                textInput.value = '';
+                outputDisplay.textContent = 'Your IPA translation will appear here.';
+            });
+        });
+
         // Event listener for the "Translate to IPA" button
         translateButton.addEventListener('click', () => {
-            const textToTranslate = englishInput.value.trim();
+            const textToTranslate = textInput.value.trim();
+            let selectedMainLanguage = 'english'; // Default to English
+
+            for (const radio of mainLanguageRadios) {
+                if (radio.checked) {
+                    selectedMainLanguage = radio.value;
+                    break;
+                }
+            }
 
             if (textToTranslate === '') {
-                outputDisplay.innerHTML = '<span class="text-red-500">Please enter some English text to translate.</span>';
+                outputDisplay.innerHTML = '<span class="text-red-500">Please enter some text to translate.</span>';
                 return;
             }
 
-            translateTextToIPA(textToTranslate);
+            if (selectedMainLanguage === 'chinese') {
+                let selectedDialect = 'mandarin'; // Default to Mandarin for Chinese
+                for (const radio of chineseDialectRadios) {
+                    if (radio.checked) {
+                        selectedDialect = radio.value;
+                        break;
+                    }
+                }
+                translateTextToIPA(textToTranslate, selectedMainLanguage, selectedDialect);
+            } else {
+                translateTextToIPA(textToTranslate, selectedMainLanguage);
+            }
         });
 
         // Event listener for the "Clear Text" button
         clearButton.addEventListener('click', () => {
-            englishInput.value = ''; // Clear the input textarea
+            textInput.value = ''; // Clear the input textarea
             outputDisplay.textContent = 'Your IPA translation will appear here.'; // Reset the output display
-            englishInput.focus(); // Put focus back on the input
+            textInput.focus(); // Put focus back on the input
         });
 
-        // Initial message on load
+        // Initial setup on load
         window.onload = () => {
-            englishInput.focus();
+            textInput.focus();
+            // Ensure Chinese dialect selector is hidden by default
+            chineseDialectSelector.classList.add('hidden');
+            // Set default placeholder text
+            textInput.placeholder = "Type your English text here...";
         };
     </script>
 </body>
