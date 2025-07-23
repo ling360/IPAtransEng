@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to IPA Translator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for Montserrat font */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            border-radius: 0.75rem; /* Rounded corners for textarea */
+            padding: 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border: 1px solid #cbd5e0; /* Light gray border */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #B6A18B; /* Gold focus border */
+            box-shadow: 0 0 0 3px rgba(182, 161, 139, 0.4); /* Soft focus shadow with gold */
+        }
+        button {
+            padding: 1rem 2rem; /* Increased padding for bigger buttons */
+            border-radius: 0.75rem; /* Rounded corners for buttons */
+            font-weight: 600;
+            font-size: 1.1rem; /* Larger font size for buttons */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #841D41; /* Red */
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(132, 29, 65, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #6a1734; /* Darker red */
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #f8f0e8; /* Light gold background */
+            color: #841D41; /* Red text */
+            border: 1px solid #B6A18B; /* Gold border */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .btn-secondary:hover {
+            background-color: #e6dacd; /* Even lighter gold */
+            transform: translateY(-2px);
+        }
+        .output-box {
+            background-color: #f8fafc; /* Lighter background for output */
+            border: 1px dashed #94a3b8; /* Dashed border for distinction */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            min-height: 80px;
+            text-align: left;
+            word-wrap: break-word; /* Ensure long text wraps */
+            color: #334155; /* Darker text color */
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #841D41; /* Red */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800">English to IPA Translator</h1>
+
+        <textarea
+            id="englishInput"
+            class="w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Type your English text here..."
+        ></textarea>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <button id="translateButton" class="btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                Translate to IPA
+            </button>
+            <button id="clearButton" class="btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd" />
+                </svg>
+                Clear Text
+            </button>
+        </div>
+
+        <div id="outputDisplay" class="output-box">
+            Your IPA translation will appear here.
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const englishInput = document.getElementById('englishInput');
+        const translateButton = document.getElementById('translateButton');
+        const clearButton = document.getElementById('clearButton');
+        const outputDisplay = document.getElementById('outputDisplay');
+
+        // Function to call the Gemini API for translation
+        async function translateTextToIPA(text) {
+            outputDisplay.innerHTML = '<div class="loading-spinner"></div> Translating...';
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: `Translate the following English text into its International Phonetic Alphabet (IPA) transcription. Provide only the IPA transcription, without any additional text or explanation:\n\n"${text}"` }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will automatically provide the API key at runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const ipaText = result.candidates[0].content.parts[0].text;
+                    outputDisplay.textContent = ipaText;
+                } else {
+                    outputDisplay.innerHTML = '<span class="text-red-500">Error: Could not get IPA translation. Please try again.</span>';
+                    console.error('Gemini API response structure unexpected:', result);
+                }
+            } catch (error) {
+                outputDisplay.innerHTML = '<span class="text-red-500">Error during translation: ' + error.message + '</span>';
+                console.error('Translation error:', error);
+            }
+        }
+
+        // Event listener for the "Translate to IPA" button
+        translateButton.addEventListener('click', () => {
+            const textToTranslate = englishInput.value.trim();
+
+            if (textToTranslate === '') {
+                outputDisplay.innerHTML = '<span class="text-red-500">Please enter some English text to translate.</span>';
+                return;
+            }
+
+            translateTextToIPA(textToTranslate);
+        });
+
+        // Event listener for the "Clear Text" button
+        clearButton.addEventListener('click', () => {
+            englishInput.value = ''; // Clear the input textarea
+            outputDisplay.textContent = 'Your IPA translation will appear here.'; // Reset the output display
+            englishInput.focus(); // Put focus back on the input
+        });
+
+        // Initial message on load
+        window.onload = () => {
+            englishInput.focus();
+        };
+    </script>
+</body>
+</html>
